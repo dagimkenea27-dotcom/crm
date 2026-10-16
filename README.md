@@ -9,15 +9,6 @@ A full-stack, local-first Sales CRM for remote contractor management, customer l
 - **Application URL:** [http://localhost/gojo-crm-laravel/public](http://localhost/gojo-crm-laravel/public)
 - **Database:** MySQL via XAMPP (`gojo_crm`)
 
-### Default Login Accounts
-
-| Role | Email | Password | Coupon Code |
-|---|---|---|---|
-| **Manager (Admin)** | `admin@gojoshop.com` | `password` | — |
-| **Contractor (Hanna)** | `hanna@gojoshop.com` | `password` | `HANNA_100` |
-| **Contractor (Dawit)** | `dawit@gojoshop.com` | `password` | `DAWIT_100` |
-| **Contractor (Selam)** | `selam@gojoshop.com` | `password` | `SELAM_100` |
-
 ---
 
 ## 🚀 Key Features

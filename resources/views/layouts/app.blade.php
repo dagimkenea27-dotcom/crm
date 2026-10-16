@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Gojo Shop') | CRM</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     @stack('head')
 </head>
 <body>
@@ -53,13 +52,13 @@
         </nav>
 
         <div class="sidebar-footer">
-            <div class="user-info">
+            <a href="{{ auth()->user()->isManager() ? route('settings.index') . '#admin-profile' : '#' }}" class="user-info" style="text-decoration:none; flex:1; min-width:0;" title="{{ auth()->user()->isManager() ? 'Admin Profile Settings' : auth()->user()->name }}">
                 <div class="user-avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
-                <div>
+                <div style="min-width:0;">
                     <div class="user-name">{{ auth()->user()->name }}</div>
                     <div class="user-role">{{ ucfirst(auth()->user()->role) }}</div>
                 </div>
-            </div>
+            </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="logout-btn" title="Sign out">
@@ -76,9 +75,16 @@
                 <svg viewBox="0 0 24 24" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
             <div class="top-bar-right">
+                @if(auth()->user()->isManager())
+                <a href="{{ route('settings.index') }}#admin-profile" class="top-greeting" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:inherit;" title="Admin Profile & Settings">
+                    <svg viewBox="0 0 24 24" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>{{ auth()->user()->name }} ({{ ucfirst(auth()->user()->role) }})</span>
+                </a>
+                @else
                 <span class="top-greeting">
                     {{ auth()->user()->name }} ({{ ucfirst(auth()->user()->role) }})
                 </span>
+                @endif
             </div>
         </header>
 
@@ -88,6 +94,16 @@
             @endif
             @if(session('error'))
                 <div class="alert alert-error">{{ session('error') }}</div>
+            @endif
+            @if($errors->any())
+                <div class="alert alert-error" style="display:block;">
+                    <div style="font-weight:600; margin-bottom:4px;">Please correct the errors below:</div>
+                    <ul style="margin:0; padding-left:18px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
 
             @yield('content')

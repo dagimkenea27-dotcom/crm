@@ -11,12 +11,52 @@ class UserController extends Controller
 
     public function index()
     {
+        $admin = auth()->user();
         $contractors = User::where('role', 'contractor')->withCount([
             'assignedCustomers',
             'assignedCustomers as verified_count' => fn($q) => $q->whereNotNull('verified_order_id'),
         ])->get();
 
-        return view('manager.settings', compact('contractors'));
+        return view('manager.settings', compact('contractors', 'admin'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $admin = auth()->user();
+
+        $data = $request->validate([
+            'name'  => 'required|string|max:100',
+            'email' => "required|email|max:150|unique:users,email,{$admin->id}",
+        ]);
+
+        $admin->update([
+            'name'  => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        return back()->with('success', 'Profile details updated successfully.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $admin = auth()->user();
+
+        $request->validate([
+            'current_password' => 'required',
+            'password'         => 'required|string|min:8|confirmed',
+        ], [
+            'password.confirmed' => 'The new password confirmation does not match.',
+        ]);
+
+        if (!Hash::check($request->current_password, $admin->password)) {
+            return back()->withErrors(['current_password' => 'The provided current password does not match our records.']);
+        }
+
+        $admin->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Password changed successfully.');
     }
 
     public function store(Request $request)

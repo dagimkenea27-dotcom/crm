@@ -1,17 +1,147 @@
 @extends('layouts.app')
 
-@section('title', 'Team Settings')
+@section('title', 'Admin Settings & Team')
 
 @section('content')
 <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
     <div>
-        <h1 class="page-title">Team & Compensation Settings</h1>
-        <p class="page-subtitle">Manage contractor accounts, commission rates, and assigned coupon codes</p>
+        <h1 class="page-title">Settings & Administration</h1>
+        <p class="page-subtitle">Manage your administrator profile, account security, and contractor team settings</p>
     </div>
-    <button class="btn btn-primary" onclick="openAddUserModal()" style="display:inline-flex; align-items:center; gap:8px;">
-        <svg viewBox="0 0 24 24" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Team Member
-    </button>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="#admin-profile" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Admin Profile
+        </a>
+        <button class="btn btn-primary" onclick="openAddUserModal()" style="display:inline-flex; align-items:center; gap:8px;">
+            <svg viewBox="0 0 24 24" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Team Member
+        </button>
+    </div>
+</div>
+
+<!-- Admin Profile & Security Grid -->
+<div id="admin-profile" class="grid-2" style="margin-bottom:28px;">
+    <!-- Profile Information Card -->
+    <div class="card" style="margin-bottom:0;">
+        <div class="card-header" style="margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+            <div>
+                <h2 class="card-title" style="display:flex; align-items:center; gap:8px;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" style="color:var(--primary);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Profile Information
+                </h2>
+                <p class="card-subtitle">Update your personal administrator account details</p>
+            </div>
+            <span class="badge badge-primary">{{ ucfirst($admin->role ?? 'Manager') }}</span>
+        </div>
+
+        <form method="POST" action="{{ route('settings.profile.update') }}">
+            @csrf
+            @method('PUT')
+
+            <div class="form-group">
+                <label for="admin-name" class="form-label">Full Name *</label>
+                <input type="text" id="admin-name" name="name" class="form-input" required autocomplete="name"
+                       value="{{ old('name', $admin->name ?? auth()->user()->name) }}" placeholder="e.g. John Doe">
+                @error('name')
+                    <div style="color:var(--danger); font-size:12px; margin-top:4px;">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="admin-email" class="form-label">Email Address *</label>
+                <input type="email" id="admin-email" name="email" class="form-input" required autocomplete="email"
+                       value="{{ old('email', $admin->email ?? auth()->user()->email) }}" placeholder="admin@example.com">
+                @error('email')
+                    <div style="color:var(--danger); font-size:12px; margin-top:4px;">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="admin-role-display" class="form-label">System Role & Access</label>
+                <input type="text" id="admin-role-display" class="form-input" disabled readonly
+                       value="{{ ucfirst($admin->role ?? auth()->user()->role) }} (Full Administrator Access)"
+                       style="background:#f8fafc; color:var(--text-muted); cursor:not-allowed;">
+                <div class="form-hint">Managers have full access to order verification, customer reassignments, imports, and team payouts.</div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                <button type="submit" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save Profile
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Security & Password Card -->
+    <div class="card" style="margin-bottom:0;">
+        <div class="card-header" style="margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+            <div>
+                <h2 class="card-title" style="display:flex; align-items:center; gap:8px;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" style="color:var(--primary);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Change Password
+                </h2>
+                <p class="card-subtitle">Ensure your account is secured with a strong password</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('settings.password.update') }}">
+            @csrf
+            @method('PUT')
+
+            <div class="form-group">
+                <label for="current_password" class="form-label">Current Password *</label>
+                <div style="position:relative;">
+                    <input type="password" id="current_password" name="current_password" class="form-input" required autocomplete="current-password" placeholder="Enter current password" style="padding-right:40px;">
+                    <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('current_password', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;" aria-label="Toggle password visibility">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+                @error('current_password')
+                    <div style="color:var(--danger); font-size:12px; margin-top:4px;">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="new_password" class="form-label">New Password *</label>
+                <div style="position:relative;">
+                    <input type="password" id="new_password" name="password" class="form-input" required autocomplete="new-password" minlength="8" placeholder="Minimum 8 characters" style="padding-right:40px;">
+                    <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('new_password', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;" aria-label="Toggle password visibility">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+                @error('password')
+                    <div style="color:var(--danger); font-size:12px; margin-top:4px;">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirmation" class="form-label">Confirm New Password *</label>
+                <div style="position:relative;">
+                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-input" required autocomplete="new-password" minlength="8" placeholder="Repeat new password" style="padding-right:40px;">
+                    <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('password_confirmation', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;" aria-label="Toggle password visibility">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                <button type="submit" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Update Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Team Section Header -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+    <div>
+        <h2 style="font-size:16px; font-weight:700; color:var(--text);">Team Members & Compensation</h2>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Contractor accounts, commission rates, and assigned coupon codes</p>
+    </div>
 </div>
 
 <!-- Team Table Card -->
@@ -210,7 +340,7 @@ function closeAddUserModal() {
     document.getElementById('addUserModal').style.display = 'none';
 }
 function openEditModal(user) {
-    document.getElementById('editUserForm').action = '/settings/users/' + user.id;
+    document.getElementById('editUserForm').action = '{{ url('settings/users') }}/' + user.id;
     document.getElementById('editName').value = user.name || '';
     document.getElementById('editCoupon').value = user.coupon_code || '';
     document.getElementById('editFixed').value = user.fixed_pay_birr || '0.00';
@@ -219,6 +349,20 @@ function openEditModal(user) {
 }
 function closeEditModal() {
     document.getElementById('editUserModal').style.display = 'none';
+}
+
+function togglePasswordVisibility(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+        btn.setAttribute('aria-label', 'Hide password');
+    } else {
+        input.type = 'password';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        btn.setAttribute('aria-label', 'Show password');
+    }
 }
 </script>
 @endpush

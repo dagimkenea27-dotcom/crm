@@ -383,7 +383,7 @@ async function openCallModal(customerId) {
     content.style.display = 'none';
 
     try {
-        const res = await fetch(`/customers/${customerId}`, {
+        const res = await fetch(`{{ url('customers') }}/${customerId}`, {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
@@ -469,7 +469,7 @@ async function submitCall(e) {
     };
 
     try {
-        const res = await fetch(`/customers/${currentCustomerId}/call`, {
+        const res = await fetch(`{{ url('customers') }}/${currentCustomerId}/call`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -495,7 +495,7 @@ async function submitReassign() {
     if (!confirm('Reassign customer to this contractor?')) return;
 
     try {
-        const res = await fetch(`/customers/${currentCustomerId}/reassign`, {
+        const res = await fetch(`{{ url('customers') }}/${currentCustomerId}/reassign`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -527,7 +527,7 @@ async function submitVerify(e) {
     };
 
     try {
-        const res = await fetch(`/customers/${currentCustomerId}/verify`, {
+        const res = await fetch(`{{ url('customers') }}/${currentCustomerId}/verify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

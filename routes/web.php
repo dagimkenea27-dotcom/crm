@@ -36,10 +36,17 @@ Route::middleware('auth')->group(function () {
 
         // Settings / user management
         Route::get('/settings', [UserController::class, 'index'])->name('settings.index');
+        Route::put('/settings/profile', [UserController::class, 'updateProfile'])->name('settings.profile.update');
+        Route::put('/settings/password', [UserController::class, 'updatePassword'])->name('settings.password.update');
         Route::post('/settings/users', [UserController::class, 'store'])->name('settings.users.store');
         Route::put('/settings/users/{user}', [UserController::class, 'update'])->name('settings.users.update');
         Route::delete('/settings/users/{user}', [UserController::class, 'destroy'])->name('settings.users.destroy');
     });
+
+    // Profile shortcut route
+    Route::get('/profile', function () {
+        return redirect()->route('settings.index');
+    })->name('profile');
 
     // Contractor performance
     Route::get('/my-performance', [PerformanceController::class, 'index'])->name('contractor.performance');
